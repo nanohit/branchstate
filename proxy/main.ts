@@ -1,6 +1,6 @@
 // Посредник к моделям: Deno Deploy + KV. Не хранит партий, не держит соединений и не видит мира —
 // только структурированные запросы операций. Хранит ключ провайдера, проверяет сессию и лимиты,
-// собирает промпт из своей копии пакета сценария, вызывает модель, хранит результат по op_id,
+// собирает промпт из своей копии пакета сценария, вызывает модель в фоне, хранит результат по op_id,
 // считает затраты и обращения.
 //
 //   deno run --unstable-kv --allow-net --allow-env --allow-read proxy/main.ts
@@ -59,7 +59,7 @@ const counter = async (key: Deno.KvKey) => Number(((await kv.get<Deno.KvU64>(key
 const bump = (keys: Deno.KvKey[], n: number) => keys.reduce((a, k) => a.sum(k, BigInt(Math.max(0, Math.round(n)))), kv.atomic()).commit();
 const runOf = (opId: string) => opId.split(':')[0];
 
-type Op = { status: 'pending' | 'done' | 'failed'; hash: string; request: OpRequest; token: string; result?: unknown; model_used?: string; cost_rub?: number; error?: string };
+type Op = { status: 'pending' | 'done' | 'failed'; hash: string; request: OpRequest; token: string; started: number; result?: unknown; model_used?: string; cost_rub?: number; error?: string };
 type OpRequest = { op_id: string; kind: 'decide' | 'narrate'; pack_version: string; persona_id: string; tier: string; observation: Record<string, unknown> };
 
 /** Клиент присылает только идентификаторы, числа и перечисления: свободного текста нет. */
@@ -190,8 +190,20 @@ async function execute(opId: string) {
   }
 }
 
-// Живучесть операции: запрос ставится в очередь KV; обрыв связи у клиента операцию не прерывает.
-kv.listenQueue((msg) => execute((msg as { op_id: string }).op_id));
+// Живучесть операции: вызов модели идёт в фоне и не привязан к запросу — обрыв связи у клиента его
+// не прерывает. Очередей KV на Deno Deploy нет, поэтому вместо очереди — аренда: если исполнитель
+// пропал (перезапуск экземпляра), операцию старше LEASE_MS подхватывает следующий запрос по op_id.
+const LEASE_MS = 60_000;
+const launch = (opId: string) => void execute(opId).catch(() => {});
+
+/** Подхватить зависшую операцию; атомарная проверка версии не даёт исполнить её дважды. */
+async function revive(opId: string) {
+  const entry = await kv.get<Op>(['op', opId]);
+  const op = entry.value;
+  if (!op || op.status !== 'pending' || Date.now() - op.started < LEASE_MS) return;
+  const taken = await kv.atomic().check(entry).set(['op', opId], { ...op, started: Date.now() } satisfies Op, { expireIn: OP_TTL }).commit();
+  if (taken.ok) launch(opId);
+}
 
 // ---- HTTP
 
@@ -227,11 +239,12 @@ async function postOp(req: Request, token: string): Promise<Response> {
   if (existing) {
     // Идемпотентно по op_id: тот же запрос возвращает состояние, другой — 409.
     if (existing.hash !== hash) return json(409, { error: 'op_id уже занят другим запросом' });
+    if (existing.status === 'pending') await revive(r.op_id);
     return existing.status === 'done' ? json(200, { result: existing.result }) : existing.status === 'failed' ? json(200, { status: 'failed' }) : json(202, { retry_after: 300 });
   }
   const cached = (await kv.get<{ result: unknown; model_used: string }>(['cache', hash])).value;
   if (cached) {
-    await kv.set(key, { status: 'done', hash, request: r, token, result: cached.result, model_used: cached.model_used, cost_rub: 0 } satisfies Op, { expireIn: OP_TTL });
+    await kv.set(key, { status: 'done', hash, request: r, token, started: Date.now(), result: cached.result, model_used: cached.model_used, cost_rub: 0 } satisfies Op, { expireIn: OP_TTL });
     await bump([['ledger', day(), 'cache_hits']], 1);
     return json(200, { result: cached.result });
   }
@@ -243,14 +256,18 @@ async function postOp(req: Request, token: string): Promise<Response> {
     if (r.tier !== 'Large') return json(429, { error: 'limit' });
     r = { ...r, tier: 'Small' };
   }
-  const created = await kv.atomic().check({ key, versionstamp: null }).set(key, { status: 'pending', hash, request: r, token } satisfies Op, { expireIn: OP_TTL }).enqueue({ op_id: r.op_id }).commit();
-  if (created.ok) await bump([['limit', token, day(), 'ops'], ['limit', 'run', runOf(r.op_id), 'ops'], ['ledger', day(), 'ops']], 1);
+  const created = await kv.atomic().check({ key, versionstamp: null }).set(key, { status: 'pending', hash, request: r, token, started: Date.now() } satisfies Op, { expireIn: OP_TTL }).commit();
+  if (created.ok) {
+    launch(r.op_id);
+    await bump([['limit', token, day(), 'ops'], ['limit', 'run', runOf(r.op_id), 'ops'], ['ledger', day(), 'ops']], 1);
+  }
   return json(202, { retry_after: 300 });
 }
 
 /** Ожидание результата до 10 с. */
 async function getOp(opId: string): Promise<Response> {
   const deadline = Date.now() + 10_000;
+  await revive(opId);
   for (;;) {
     const op = (await kv.get<Op>(['op', opId])).value;
     if (!op) return json(404, { error: 'нет операции' });
