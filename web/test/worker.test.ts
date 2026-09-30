@@ -202,7 +202,7 @@ test('создание и публикация: сбой между индекс
     const a = tab(env);
     await a.open(null);
     const runId = uuid();
-    const body = { t: 'NewRun', scenario: 'island', seed: null, daily: false, mode: 'Scripted' } as const;
+    const body = { t: 'NewRun', scenario: 'island', seed: null, daily: false, mode: 'Scripted', sandbox: false } as const;
     await a.cmd(runId, body, { command_id: 'create-1' });
     let index = await readStore<RunIndexEntry>(env, 'branchstate', 'runs_index');
     assert.deepEqual(index.map((e) => [e.run_id, e.status]), [[runId, 'creating']], 'незавершённая партия не выдаётся за готовую');
@@ -413,4 +413,26 @@ test('Ping отвечает Pong с epoch и фазой; запросы прев
   const preview = t.take('PreviewResult').at(-1)!;
   assert.deepEqual([preview.req_id, preview.preview.reject, preview.preview.orders[0].incursion], [2, null, 'SKE']);
   assert.equal(runId, preview.run_id);
+});
+
+test('песочница: партия без цели не заканчивается и после перезапуска открывается тем же вариантом пакета', async () => {
+  const env = newEnv();
+  const t = tab(env);
+  const runId = await newRun(t, 'july1914', 'Scripted', 7, true);
+  const me = t.view().panel.me;
+  assert.equal(me.t === 'Me' && me.v.goal, null, 'цели нет');
+  for (let i = 0; i < 8; i++) assert.equal(await advance(t, runId, { Days: 7 }), false);
+  const days = await journal(env, runId);
+  assert.ok(days.length > 30, 'партия идёт дальше даты предела обычного сценария');
+  const index = await readStore<RunIndexEntry>(env, 'branchstate', 'runs_index');
+  assert.deepEqual(index.map((e) => [e.title, e.ended]), [['Июль 1914 — песочница', false]]);
+
+  // Новый Worker: журнал воспроизводится с теми же хэшами только на пакете песочницы.
+  const b = tab(env);
+  await b.open(runId, { steal: true });
+  assert.equal(b.view().phase, 'AtStop');
+  assert.equal(b.view().day, days.length);
+  // У «Острова» песочницы нет: флаг игнорируется, цель остаётся.
+  const plain = await newRun(tab(newEnv()), 'island', 'Scripted', 7, true).catch(() => null);
+  assert.ok(plain);
 });

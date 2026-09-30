@@ -66,15 +66,15 @@ pub fn great(pack: &Pack, s: StateId) -> bool {
 
 /// Статус цели после разрешения дня `day` (мир уже отражает этот день).
 pub fn goal_status(pack: &Pack, w: &World, day: Day) -> GoalStatus {
-    if w.goal != GoalStatus::Open {
+    let Some(goal) = pack.goal.as_ref().filter(|_| w.goal == GoalStatus::Open) else {
         return w.goal.clone();
-    }
-    let holds = pack.goal.pred.eval(pack, w);
-    match pack.goal.kind {
+    };
+    let holds = goal.pred.eval(pack, w);
+    match goal.kind {
         GoalKind::Hold if !holds => GoalStatus::Failed(day),
-        GoalKind::Hold if day >= pack.goal.day => GoalStatus::Achieved(day),
+        GoalKind::Hold if day >= goal.day => GoalStatus::Achieved(day),
         GoalKind::Achieve if holds => GoalStatus::Achieved(day),
-        GoalKind::Achieve if day >= pack.goal.day => GoalStatus::Failed(day),
+        GoalKind::Achieve if day >= goal.day => GoalStatus::Failed(day),
         _ => GoalStatus::Open,
     }
 }

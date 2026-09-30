@@ -55,7 +55,7 @@ export type Class = "GreatPower" | "Minor";
 
 export type Command = { run_id: string, command_id: string, expected_rev: number, body: CommandBody, };
 
-export type CommandBody = { "t": "Commit", intents: Array<OrderKind>, } | { "t": "Cancel", order_id: number, } | { "t": "Advance", mode: AdvanceMode, } | { "t": "Fork", day: number, } | { "t": "NewRun", scenario: string, seed: number | null, daily: boolean, mode: RunMode, } | { "t": "Import", file: string, };
+export type CommandBody = { "t": "Commit", intents: Array<OrderKind>, } | { "t": "Cancel", order_id: number, } | { "t": "Advance", mode: AdvanceMode, } | { "t": "Fork", day: number, } | { "t": "NewRun", scenario: string, seed: number | null, daily: boolean, mode: RunMode, sandbox: boolean, } | { "t": "Import", file: string, };
 
 export type Commitment = { id: number, agreement: number, term: number, debtor: string, creditor: string, status: CStatus, paid: number, due: Due | null, };
 
@@ -113,7 +113,11 @@ export type MeView = { state: string, name: string, scenario: string, resources:
 /**
  * Инициатива и казна за вычетом резерва принятых приказов.
  */
-initiative_left: number, treasury_left: number, mob_target: [number, number] | null, goal: GoalView, };
+initiative_left: number, treasury_left: number, mob_target: [number, number] | null, 
+/**
+ * Цель партии; в песочнице её нет.
+ */
+goal: GoalView | null, };
 
 export type MemKind = "Grievance" | "Favor" | "Promise" | "Breach";
 
@@ -225,13 +229,13 @@ template: string | null, weight: number, };
 
 export type Res = "Treasury" | "Mobilization" | "Pressure" | "Food";
 
-export type RunHeader = { format: number, scenario: string, pack_version: string, engine_version: string, runtime_manifest_id: string, seed: number, mode: RunMode, parent_id: string | null, fork_day: number | null, };
+export type RunHeader = { format: number, scenario: string, pack_version: string, engine_version: string, runtime_manifest_id: string, seed: number, mode: RunMode, sandbox: boolean, parent_id: string | null, fork_day: number | null, };
 
 export type RunMode = "Scripted" | "Llm";
 
 export type RuntimeManifest = { id: string, protocol: number, engine_version: string, ui: FileRef, core: FileRef, wasm: FileRef, fonts: Array<FileRef>, scenarios: { [key in string]: ScenarioFiles }, };
 
-export type ScenarioFiles = { title: string, pack_version: string, pack: FileRef, geo_bin: FileRef, geo_json: FileRef, };
+export type ScenarioFiles = { title: string, sandbox: string | null, pack_version: string, pack: FileRef, geo_bin: FileRef, geo_json: FileRef, };
 
 export type Source = "Player" | "Plan" | "Model" | "Fallback" | "Rule";
 

@@ -344,10 +344,18 @@ export class Host {
     this.post({ t: 'Opened', run_id: this.runId, epoch: this.epoch, writer: false });
   }
 
+  /** Пакет партии. Песочница — тот же пакет с переопределениями своего варианта: без цели и конца партии. */
+  private async packFor(header: RunHeader): Promise<string> {
+    const base = await this.d.loadPack(this.manifest, header.scenario);
+    if (!header.sandbox) return base;
+    const pack = JSON.parse(base);
+    return JSON.stringify({ ...pack, ...pack.sandbox });
+  }
+
   /** Последний снимок, дни журнала после него по записанным входам, затем записанный `TurnOp`. */
   private async recover() {
     const store = this.store!;
-    const pack = await this.d.loadPack(this.manifest, this.header!.scenario);
+    const pack = await this.packFor(this.header!);
     const turn = (await store.get<TurnOp>('turn_op', this.runId!))!;
     const snaps = (await store.keys('snapshots')) as number[];
     const latest = (await store.get<SnapshotRec>('snapshots', Math.max(...snaps)))!;
@@ -683,7 +691,7 @@ export class Host {
       const sc = this.manifest.scenarios[body.scenario];
       if (!sc) return reject('Invalid', 'нет такого сценария');
       const seed = body.seed ?? (body.daily ? hashSeed(`${body.scenario}:${this.d.today()}`) : this.d.randomSeed());
-      header = { format: 1, scenario: body.scenario, pack_version: sc.pack_version, engine_version: ENGINE_VERSION, runtime_manifest_id: this.manifest.id, seed, mode: body.mode, parent_id: null, fork_day: null };
+      header = { format: 1, scenario: body.scenario, pack_version: sc.pack_version, engine_version: ENGINE_VERSION, runtime_manifest_id: this.manifest.id, seed, mode: body.mode, sandbox: body.sandbox && !!sc.sandbox, parent_id: null, fork_day: null };
     }
 
     // 1. Индекс: связь команды с постоянным целевым run_id, хэш запроса, статус `creating`.
@@ -700,7 +708,7 @@ export class Host {
       entry = {
         run_id: cmd.run_id,
         runtime_manifest_id: this.manifest.id,
-        title: this.manifest.scenarios[header.scenario].title,
+        title: (header.sandbox && this.manifest.scenarios[header.scenario].sandbox) || this.manifest.scenarios[header.scenario].title,
         scenario: header.scenario,
         updated_at: Date.now(),
         status: 'creating',
@@ -719,7 +727,7 @@ export class Host {
 
     if (entry.status === 'creating') {
       // 2. Начальные данные и отметка завершения инициализации — под блокировкой целевой партии.
-      const pack = await this.d.loadPack(this.manifest, header.scenario);
+      const pack = await this.packFor(header);
       let core: Core;
       const days: DayRecord[] = [];
       try {

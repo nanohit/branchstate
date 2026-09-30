@@ -140,7 +140,7 @@ async function create(body: CommandBody) {
   else toast(`Не получилось: ${out.detail ?? out.reason}`);
 }
 
-const scenarios = Object.entries(manifest.scenarios).map(([id, s]) => [id, s.title] as [string, string]);
+const scenarios = Object.entries(manifest.scenarios).map(([id, s]) => [id, s.title, s.sandbox] as [string, string, string | null]);
 
 // ---- запуск
 
@@ -351,7 +351,7 @@ async function start() {
         await create({ t: 'Fork', day: Number(arg) });
         break;
       case 'new':
-        await create({ t: 'NewRun', scenario: rest[0], seed: null, daily: rest[2] === 'daily', mode: rest[1] as 'Scripted' | 'Llm' });
+        await create({ t: 'NewRun', scenario: rest[0], seed: null, daily: rest[2] === 'daily', mode: rest[1] as 'Scripted' | 'Llm', sandbox: rest[2] === 'sandbox' });
         break;
       case 'open':
         switchRun(arg);
@@ -527,7 +527,7 @@ function startScreen() {
     const t = (e.target as HTMLElement).closest<HTMLElement>('[data-a]');
     if (!t) return;
     const [kind, ...rest] = t.dataset.a!.split(':');
-    if (kind === 'new' && e.type === 'click') void create({ t: 'NewRun', scenario: rest[0], seed: null, daily: rest[2] === 'daily', mode: rest[1] as 'Scripted' | 'Llm' });
+    if (kind === 'new' && e.type === 'click') void create({ t: 'NewRun', scenario: rest[0], seed: null, daily: rest[2] === 'daily', mode: rest[1] as 'Scripted' | 'Llm', sandbox: rest[2] === 'sandbox' });
     if (kind === 'open' && e.type === 'click') switchRun(rest.join(':'));
     if (kind === 'import' && e.type === 'change') void (t as HTMLInputElement).files?.[0]?.text().then((file) => create({ t: 'Import', file }));
   };

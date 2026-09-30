@@ -399,3 +399,17 @@ proptest! {
         let _ = (observe(&run.world, &run.minds, player), outcome(&run));
     }
 }
+
+/// Песочница: тот же сценарий без цели и без конца партии — идёт дальше даты предела, законы держатся.
+#[test]
+fn sandbox_never_ends() {
+    let scenario = include_str!("../../../scenarios/july1914/scenario.json");
+    let overrides = serde_json::from_str::<serde_json::Value>(scenario).unwrap()["sandbox"].to_string();
+    let pack = Pack::load(&[include_str!("../../../scenarios/july1914/map.json"), scenario, &overrides]).unwrap();
+    assert!(pack.goal.is_none() && pack.endless);
+    for seed in 1..=40 {
+        let (run, journal) = scripted(&pack, seed, 60);
+        assert_eq!(journal.len(), 60, "сид {seed}: партия не должна закончиться");
+        assert!(!run.ended() && run.world.goal == GoalStatus::Open);
+    }
+}

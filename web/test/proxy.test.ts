@@ -135,7 +135,7 @@ test('партия llm через посредника: решения моде�
   const cmd = (run_id: string, body: any) => host.handle({ t: 'Command', run_id, command_id: uuid(), expected_rev: out.some((m) => m.t === 'ViewSnapshot') ? rev() : 0, body });
   await open(null);
   const runId = uuid();
-  await cmd(runId, { t: 'NewRun', scenario: 'island', seed: 3, daily: false, mode: 'Llm' });
+  await cmd(runId, { t: 'NewRun', scenario: 'island', seed: 3, daily: false, mode: 'Llm', sandbox: false });
   await open(runId);
   const view = out.findLast((m) => m.t === 'ViewSnapshot');
   const offer = Object.values(view.panel).flatMap((p: any) => (p.t === 'Actions' ? p.v : [])).find((a: any) => a.id === 'tpl:trn_mar_access');

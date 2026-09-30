@@ -193,8 +193,14 @@ struct PackData {
     #[serde(default)]
     agreements: Vec<StartAgreement>,
     params: Params,
-    goal: Goal,
+    /// Цель партии; в песочнице её нет.
+    #[serde(default)]
+    goal: Option<Goal>,
+    /// Песочница: партия не заканчивается ни по дате предела, ни по кризису.
+    #[serde(default)]
+    endless: bool,
     /// События, завершающие партию, если обе стороны — великие державы.
+    #[serde(default)]
     end_events: Vec<EventKind>,
     #[serde(default)]
     canon: Vec<Checkpoint>,
@@ -218,7 +224,8 @@ pub struct Pack {
     pub templates: Vec<Template>,
     pub agreements: Vec<StartAgreement>,
     pub params: Params,
-    pub goal: Goal,
+    pub goal: Option<Goal>,
+    pub endless: bool,
     pub end_events: Vec<EventKind>,
     pub canon: Vec<Checkpoint>,
     pub lex: Rc<Lexicon>,
@@ -319,6 +326,7 @@ impl Pack {
             agreements: d.agreements,
             params: d.params,
             goal: d.goal,
+            endless: d.endless,
             end_events: d.end_events,
             canon: d.canon,
             lex,

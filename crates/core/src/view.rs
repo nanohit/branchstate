@@ -62,7 +62,8 @@ data! {
         pub initiative_left: u8,
         pub treasury_left: i32,
         pub mob_target: Option<(i32, Day)>,
-        pub goal: GoalView,
+        /// Цель партии; в песочнице её нет.
+        pub goal: Option<GoalView>,
     }
 
     pub struct OrderView {
@@ -295,7 +296,7 @@ pub fn player_view(run: &Run, phase: Phase, stop: &[StopReason]) -> PlayerView {
             initiative_left: acc.as_ref().map_or(obs.me.init, |a| a.initiative_left),
             treasury_left: acc.as_ref().map_or(obs.res(Res::Treasury), |a| a.treasury_left),
             mob_target: obs.me.mob_target,
-            goal: GoalView { label: pack.goal.label.clone(), status: run.world.goal.clone(), until: date_ru(pack, pack.goal.day) },
+            goal: pack.goal.as_ref().map(|g| GoalView { label: g.label.clone(), status: run.world.goal.clone(), until: date_ru(pack, g.day) }),
         }),
     );
 

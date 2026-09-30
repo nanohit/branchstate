@@ -239,6 +239,7 @@
   "goal": { "kind": "Hold", "day": 12, "label": "Россия не начала всеобщую мобилизацию до 4 августа",
             "pred": { "ResBelow": { "state": "RUS", "res": "Mobilization", "value": 3 } } },
   "end_events": ["WarDeclared", "HostilitiesOpened"],
+  "sandbox": { "title": "Июль 1914 — песочница", "goal": null, "end_events": [], "endless": true },
   "canon": [
     { "id": "ultimatum", "day": 0, "label": "Австро-Венгрия предъявила Сербии ультиматум", "pred": { "Happened": { "kind": "Declared", "actor": "AUT", "target": "SRB" } } },
     { "id": "war_serbia", "day": 5, "label": "Австро-Венгрия объявила войну Сербии", "pred": { "War": { "a": "AUT", "b": "SRB" } } },

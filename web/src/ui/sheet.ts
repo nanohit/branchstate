@@ -25,7 +25,8 @@ export type SheetCtx = {
   /** Дата дня партии: «28 июля». */
   date: (day: number) => string;
   runs: RunInfo[];
-  scenarios: [string, string][];
+  /** Сценарии: id, название и название варианта-песочницы, если он есть. */
+  scenarios: [string, string, string | null][];
   llm: boolean;
   runId: string | null;
 };
@@ -146,7 +147,7 @@ function turnTab(c: SheetCtx): string {
     h += `<div class="row">${btn('adv:Next', 'Дальше', 'pri', !ok)}${btn('adv:3', 'Ждать 3 дня', '', !ok)}${btn('adv:7', '7 дней', '', !ok)}</div>`;
     if (stop.length) h += `<p>${[...new Set(stop.map(stopText))].map(esc).join(' · ')}</p>`;
   }
-  h += `<p class="mut">Цель: ${esc(m.goal.label)}</p>`;
+  h += `<p class="mut">${m.goal ? `Цель: ${esc(m.goal.label)}` : 'Песочница: цели нет, партия не заканчивается.'}</p>`;
   if (orders.length) {
     h += '<h4>Приказы</h4>';
     for (const o of orders.sort((a, b) => Number(b.staged) - Number(a.staged))) {
@@ -201,8 +202,10 @@ export function runTab(c: Pick<SheetCtx, 'runs' | 'scenarios' | 'llm' | 'runId'>
   // Новая партия создаётся актуальным комплектом: в открытой партии — переход на стартовый экран.
   if (c.state) return h + `<div class="row"><a class="btn sm" href="?new">Новая партия или другая партия…</a></div>`;
   h += '<h4>Новая партия</h4>';
-  for (const [id, title] of c.scenarios) {
+  for (const [id, title, sandbox] of c.scenarios) {
     h += `<div class="row"><b style="flex:1">${esc(title)}</b>${btn(`new:${id}:Scripted`, 'Без сервера', 'sm')}${c.llm ? btn(`new:${id}:Llm`, 'С моделями', 'sm') : ''}${btn(`new:${id}:Scripted:daily`, 'Партия дня', 'sm')}</div>`;
+    // Песочница: тот же сценарий без цели и без конца партии.
+    if (sandbox) h += `<div class="row"><b style="flex:1">${esc(sandbox)}</b>${btn(`new:${id}:Scripted:sandbox`, 'Без сервера', 'sm')}${c.llm ? btn(`new:${id}:Llm:sandbox`, 'С моделями', 'sm') : ''}</div>`;
   }
   h += `<div class="row"><label class="btn sm">Импорт файла<input type="file" accept=".jsonl,.txt" data-a="import" hidden></label></div>`;
   const runs = c.runs.filter((r) => r.status === 'ready').sort((a, b) => b.updated_at - a.updated_at);

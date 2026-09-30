@@ -64,7 +64,7 @@ for (const s of scenarios) {
   const pack = { ...JSON.parse(fs.readFileSync(path.join(dir, 'map.json'))), ...JSON.parse(fs.readFileSync(path.join(dir, 'scenario.json'))) };
   const geo = (f) => fs.readFileSync(path.join(dist, '..', 'build/geo', s, f));
   geoBytes = Math.max(geoBytes, gz(geo('geo.bin')) + gz(geo('geo.json')));
-  manifest.scenarios[s] = { title: pack.title, pack_version: pack.version, pack: publish(`${s}.pack.json`, Buffer.from(JSON.stringify(pack))), geo_bin: publish(`${s}.geo.bin`, geo('geo.bin')), geo_json: publish(`${s}.geo.json`, geo('geo.json')) };
+  manifest.scenarios[s] = { title: pack.title, sandbox: pack.sandbox?.title ?? null, pack_version: pack.version, pack: publish(`${s}.pack.json`, Buffer.from(JSON.stringify(pack))), geo_bin: publish(`${s}.geo.bin`, geo('geo.bin')), geo_json: publish(`${s}.geo.json`, geo('geo.json')) };
 }
 // `runtime_manifest_id` — хэш содержимого манифеста: версий и хэшей всех файлов. От места публикации
 // он не зависит, поэтому им же назван тег выпуска, под которым файлы лежат на CDN.

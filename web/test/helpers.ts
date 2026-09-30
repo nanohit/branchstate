@@ -30,7 +30,7 @@ export const manifest: RuntimeManifest = {
   wasm: file('wasm'),
   fonts: [],
   scenarios: Object.fromEntries(
-    ['island', 'july1914'].map((s) => [s, { title: JSON.parse(pack(s)).title, pack_version: JSON.parse(pack(s)).version, pack: file(s), geo_bin: file('bin'), geo_json: file('json') }]),
+    ['island', 'july1914'].map((s) => [s, { title: JSON.parse(pack(s)).title, sandbox: JSON.parse(pack(s)).sandbox?.title ?? null, pack_version: JSON.parse(pack(s)).version, pack: file(s), geo_bin: file('bin'), geo_json: file('json') }]),
   ),
 };
 
@@ -176,10 +176,10 @@ export function tab(env: Env): Tab {
 }
 
 /** Новая партия и её открытие во вкладке. */
-export async function newRun(t: Tab, scenario = 'island', mode: 'Scripted' | 'Llm' = 'Scripted', seed = 7): Promise<string> {
+export async function newRun(t: Tab, scenario = 'island', mode: 'Scripted' | 'Llm' = 'Scripted', seed = 7, sandbox = false): Promise<string> {
   await t.open(null);
   const runId = uuid();
-  const res = await t.cmd(runId, { t: 'NewRun', scenario, seed, daily: false, mode });
+  const res = await t.cmd(runId, { t: 'NewRun', scenario, seed, daily: false, mode, sandbox });
   if (res.outcome.t !== 'Accepted') throw new Error(`NewRun: ${JSON.stringify(res.outcome)}`);
   await t.open(runId);
   return runId;

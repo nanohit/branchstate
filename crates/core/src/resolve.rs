@@ -738,7 +738,8 @@ fn finish_day(ctx: &mut Ctx) {
         .iter()
         .find(|e| pack.end_events.contains(&e.kind) && e.f.actor.is_some_and(|a| goals::great(pack, a)) && e.f.target.is_some_and(|t| goals::great(pack, t)))
         .map(|e| e.id);
-    let crisis = ctx.w.events[from..].iter().find(|e| e.kind == EventKind::GovernmentCrisis && e.f.actor == Some(pack.player)).map(|e| e.id);
+    // В песочнице ни кризис, ни дата предела партию не заканчивают.
+    let crisis = ctx.w.events[from..].iter().find(|e| !pack.endless && e.kind == EventKind::GovernmentCrisis && e.f.actor == Some(pack.player)).map(|e| e.id);
     let reason = if end_event.is_some() {
         Some((EndReason::EndEvent, end_event))
     } else if crisis.is_some() {
@@ -747,7 +748,7 @@ fn finish_day(ctx: &mut Ctx) {
         match goal {
             GoalStatus::Achieved(_) => Some((EndReason::GoalAchieved, None)),
             GoalStatus::Failed(_) => Some((EndReason::GoalFailed, None)),
-            GoalStatus::Open if day >= pack.horizon => Some((EndReason::Horizon, None)),
+            GoalStatus::Open if day >= pack.horizon && !pack.endless => Some((EndReason::Horizon, None)),
             GoalStatus::Open => None,
         }
     };

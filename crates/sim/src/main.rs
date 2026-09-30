@@ -51,6 +51,7 @@ fn header(pack: &Pack, seed: u64) -> RunHeader {
         runtime_manifest_id: "cli".into(),
         seed: seed as u32,
         mode: RunMode::Scripted,
+        sandbox: false,
         parent_id: None,
         fork_day: None,
     }

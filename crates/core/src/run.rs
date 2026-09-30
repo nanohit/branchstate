@@ -374,7 +374,7 @@ impl Run {
                 }
             }
         }
-        Some(Summary { reason: end.reason.clone(), day: end.day, goal: self.world.goal.clone(), goal_label: pack.goal.label.clone(), checkpoints: goals::canon(pack, &self.world), chain })
+        Some(Summary { reason: end.reason.clone(), day: end.day, goal: self.world.goal.clone(), goal_label: pack.goal.as_ref().map(|g| g.label.clone()).unwrap_or_default(), checkpoints: goals::canon(pack, &self.world), chain })
     }
 }
 

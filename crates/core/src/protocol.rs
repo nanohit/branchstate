@@ -22,7 +22,8 @@ data! {
         Cancel { order_id: u32 },
         Advance { mode: AdvanceMode },
         Fork { day: Day },
-        NewRun { scenario: String, seed: Option<u32>, daily: bool, mode: RunMode },
+        /// `sandbox` — вариант сценария без цели и конца партии.
+        NewRun { scenario: String, seed: Option<u32>, daily: bool, mode: RunMode, #[serde(default)] sandbox: bool },
         Import { file: String },
     }
 
@@ -39,7 +40,8 @@ data! {
 
     pub struct FileRef { pub url: String, pub sri: String }
 
-    pub struct ScenarioFiles { pub title: String, pub pack_version: String, pub pack: FileRef, pub geo_bin: FileRef, pub geo_json: FileRef }
+    /// `sandbox` — название варианта-песочницы, если он есть у сценария.
+    pub struct ScenarioFiles { pub title: String, pub sandbox: Option<String>, pub pack_version: String, pub pack: FileRef, pub geo_bin: FileRef, pub geo_json: FileRef }
 
     /// Комплект версий: UI, шим-независимое ядро, WASM, сценарии и геометрия. `id` — хэш содержимого.
     pub struct RuntimeManifest {
@@ -94,6 +96,8 @@ data! {
         pub runtime_manifest_id: String,
         pub seed: u32,
         pub mode: RunMode,
+        #[serde(default)]
+        pub sandbox: bool,
         pub parent_id: Option<String>,
         pub fork_day: Option<Day>,
     }

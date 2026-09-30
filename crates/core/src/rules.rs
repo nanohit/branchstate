@@ -219,7 +219,8 @@ impl ScenarioRules for July1914 {
             let nag = pack.num(s, "nag");
             let answered = ctx.w.hostilities.iter().any(|h| h.a == s || h.b == s)
                 || ctx.w.events.iter().any(|e| e.kind == EventKind::ProposalAccepted && e.f.target == Some(s) && e.f.amount == 1);
-            if nag > 0 && !answered {
+            // В песочнице обида не копится: там нет цели, которую она подгоняла бы.
+            if nag > 0 && !answered && !pack.endless {
                 ctx.add_res(s, Res::Pressure, nag);
             }
             let (base, drift) = (pack.num(s, "pressure_base"), pack.num(s, "pressure_drift"));
@@ -230,10 +231,13 @@ impl ScenarioRules for July1914 {
             let cabinet = pack.n("cabinet_at");
             if p >= 100 {
                 ctx.emit(EventKind::GovernmentCrisis, Visibility::Public, rule(RuleTag::Threshold), Facts { actor: Some(s), ..Facts::default() });
+                let st = &mut ctx.w.states[s.ix()];
                 if s != pack.player {
                     // Смена персонажа: преемник приходит без плана и обещаний предшественника.
-                    let st = &mut ctx.w.states[s.ix()];
                     st.persona = st.persona.and_then(|p| pack.personas[p.ix()].successor).or(st.persona);
+                }
+                // Для игрока кризис — поражение; в песочнице он, как у остальных, только сбрасывает давление.
+                if s != pack.player || pack.endless {
                     st.res.insert(Res::Pressure, base);
                 }
             } else if p >= cabinet && before[s.ix()] < cabinet {

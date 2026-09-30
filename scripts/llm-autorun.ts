@@ -40,7 +40,7 @@ for (let i = 1; i <= Number(count); i++) {
   const open = (run_id: string | null) => host.handle({ t: 'Open', epoch: uuid(), run_id, manifest, proxy, steal: false });
   await open(null);
   const runId = uuid();
-  await cmd(runId, { t: 'NewRun', scenario, seed: i, daily: false, mode: 'Llm' } as never);
+  await cmd(runId, { t: 'NewRun', scenario, seed: i, daily: false, mode: 'Llm', sandbox: false } as never);
   out.length = 0;
   await open(runId);
   for (let stops = 0; stops < 60; stops++) {

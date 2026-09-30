@@ -176,7 +176,7 @@ pub fn sentence(pack: &Pack, obs: &Observation, k: &Knowledge) -> String {
         GovernmentCrisis => st(c.actor).to_string(),
         CargoLoaded | CargoUnloaded => format!("{} — {}, груз {}", asset(c.asset), nd(c.node), c.amount),
         Inquiry => format!("{} → {}", st(c.actor), st(c.target)),
-        GoalAchieved | GoalFailed => pack.goal.label.clone(),
+        GoalAchieved | GoalFailed => pack.goal.as_ref().map(|g| g.label.clone()).unwrap_or_default(),
     }
 }
 
