@@ -1,0 +1,11 @@
+# На Vercel лежит только оболочка: ей нужны scripts/shell.mjs и web/shell.
+/crates
+/geo
+/scenarios
+/proxy
+/web/src
+/web/test
+/target
+/build
+/dist
+/node_modules

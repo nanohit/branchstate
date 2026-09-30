@@ -1,0 +1,15 @@
+{
+  "frame_km": [
+    -320,
+    -240,
+    320,
+    240
+  ],
+  "smooth": 3,
+  "sliver_km2": 0,
+  "min_land_km2": 0,
+  "protect_km": 20,
+  "lod_scales": [
+    4.0
+  ]
+}

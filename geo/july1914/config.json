@@ -1,0 +1,51 @@
+{
+  "date": "1914-07-23",
+  "ohm": "input/ohm.json.gz",
+  "land": "input/ne_10m_land.geojson.gz",
+  "query": "ohm.overpassql",
+  "proj": "+proj=lcc +lat_1=40 +lat_2=56 +lat_0=48 +lon_0=16 +datum=WGS84 +units=km",
+  "clip_lonlat": [
+    -30,
+    20,
+    70,
+    75
+  ],
+  "frame_km": [
+    -2300,
+    -1550,
+    2300,
+    1650
+  ],
+  "sliver_km2": 3000,
+  "min_land_km2": 30,
+  "protect_km": 40,
+  "lod_scales": [
+    1.0
+  ],
+  "protect": [
+    [
+      26.45,
+      40.2
+    ],
+    [
+      12.7,
+      55.8
+    ],
+    [
+      15.62,
+      38.2
+    ],
+    [
+      36.55,
+      45.3
+    ],
+    [
+      29.05,
+      41.1
+    ],
+    [
+      -5.6,
+      36.0
+    ]
+  ]
+}

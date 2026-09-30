@@ -1,0 +1,28 @@
+{
+  "scenario": "island",
+  "regions": [
+    {"id": "tern", "name": "Терн", "owner": "TRN"},
+    {"id": "marena", "name": "Марена", "owner": "MAR"},
+    {"id": "volgard", "name": "Волгард", "owner": "VOL"},
+    {"id": "skerry", "name": "Скерри", "owner": "SKE"}
+  ],
+  "nodes": [
+    {"id": "tern_harbor", "name": "Гавань Терна", "x": -90, "y": 10, "region": "tern", "port": true, "gen": "Гавани Терна"},
+    {"id": "port_marena", "name": "Порт-Марена", "x": 190, "y": 20, "region": "marena", "port": true, "gen": "Порт-Марены"},
+    {"id": "volgard_base", "name": "Волгард", "x": 20, "y": -170, "region": "volgard", "port": true, "gen": "Волгарда"},
+    {"id": "skerry_port", "name": "Скерри", "x": 30, "y": 160, "region": "skerry", "port": true, "gen": "Скерри"},
+    {"id": "strait", "name": "Пролив", "x": 50, "y": 0, "sea": true, "gen": "Пролива"},
+    {"id": "north_water", "name": "Северные воды", "x": -40, "y": -95, "sea": true, "gen": "Северных вод"},
+    {"id": "south_water", "name": "Южные воды", "x": -60, "y": 100, "sea": true, "gen": "Южных вод"}
+  ],
+  "edges": [
+    {"a": "tern_harbor", "b": "strait", "mode": "sea", "days": 1},
+    {"a": "strait", "b": "port_marena", "mode": "sea", "days": 1},
+    {"a": "tern_harbor", "b": "south_water", "mode": "sea", "days": 1},
+    {"a": "south_water", "b": "skerry_port", "mode": "sea", "days": 1},
+    {"a": "skerry_port", "b": "port_marena", "mode": "sea", "days": 2},
+    {"a": "tern_harbor", "b": "north_water", "mode": "sea", "days": 1},
+    {"a": "north_water", "b": "volgard_base", "mode": "sea", "days": 1},
+    {"a": "north_water", "b": "strait", "mode": "sea", "days": 1}
+  ]
+}

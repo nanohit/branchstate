@@ -1,0 +1,33 @@
+{
+  "island": {
+    "pinned": {
+      "mapshaper": "0.7.70",
+      "config": "840ced3893249ac42cb43a11c0fa2b7a35753197dd725411bf4912a6179e6d4d",
+      "files": {
+        "patches/regions.json": "2b9ed15fb191fe440e744b28923e44dc337e28f509e4a7c589057c8849ca7c8e"
+      }
+    },
+    "result": {
+      "geo.bin": "418bbdf98ce2a16d3744ee45256b3ad3c190d293a1a8003b2e86e39cbff052ef",
+      "geo.json": "7491d701c971b25f58e11e020dca94000cd29b6cd5816fe7a7ecfe68ebdae7cb"
+    }
+  },
+  "july1914": {
+    "pinned": {
+      "mapshaper": "0.7.70",
+      "config": "1beb4b45d6c943702ed7d2420210aae965e3cb3c4168f2cb7d6244eb66eb14e9",
+      "files": {
+        "input/ne_10m_land.geojson.gz": "ef6b696b89fdeec4da5e13e370202b04babbac48de789f475be4b1baf0b82458",
+        "input/ohm.json.gz": "aa59dbf11063779970b7f28268980f9be917cbe6e5cb9ee544a4adcb03404ae6",
+        "ohm.overpassql": "0bfcee91d363a651461e95129e381e3b456f08bb9860880a84e320e77547ecba",
+        "patches/dates.json": "36ccf6a92a7f0486a93ac01bfb7ef2935c7d8ae05a0846c7f156e4be57e35474",
+        "patches/edges.json": "aace2c5b625886183e48efbbf31e36212bb17e186aed49c5bafa274eae919690",
+        "patches/regions.json": "9b2b61938bf65b076c734e74529259942e191a568c9ab8375c17da6c8a4fc549"
+      }
+    },
+    "result": {
+      "geo.bin": "65ca0f3b8e8c0f6ebba3868dc61311dc96fc601de945880d0541687b3cdada39",
+      "geo.json": "8479c8ccf6e41435794ede264bd1a505ac2dd7f18090b0ecb7e59ca019db5c3a"
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "version": "island-1",
+  "title": "Остров",
+  "rules": "island",
+  "start_date": "1900-03-01",
+  "horizon": 30,
+  "player": "TRN",
+  "states": [
+    { "id": "TRN", "name": "Терн", "class": "Minor", "capital": "tern_harbor", "capacity": 3, "regen": 2,
+      "res": { "Treasury": 30, "Food": 8 }, "n": { "income": 2, "food_per_day": 1 } },
+    { "id": "MAR", "name": "Марена", "class": "Minor", "capital": "port_marena", "capacity": 3, "regen": 2,
+      "res": { "Treasury": 60 }, "n": { "income": 5, "price": 2 } },
+    { "id": "VOL", "name": "Волгард", "class": "Minor", "capital": "volgard_base", "capacity": 3, "regen": 2,
+      "res": { "Treasury": 50 }, "n": { "income": 5 } },
+    { "id": "SKE", "name": "Скерри", "class": "Minor", "capital": "skerry_port", "capacity": 2, "regen": 3,
+      "res": { "Treasury": 20 }, "n": { "income": 2, "price": 3 } }
+  ],
+  "assets": [
+    { "id": "trn_convoy_1", "name": "Конвой «Северянка»", "kind": "Convoy", "owner": "TRN", "at": "tern_harbor" },
+    { "id": "trn_convoy_2", "name": "Конвой «Чайка»", "kind": "Convoy", "owner": "TRN", "at": "tern_harbor" },
+    { "id": "trn_flotilla", "name": "Флотилия Терна", "kind": "Flotilla", "owner": "TRN", "at": "tern_harbor" },
+    { "id": "mar_fleet", "name": "Флот Марены", "kind": "Fleet", "owner": "MAR", "at": "port_marena" },
+    { "id": "vol_fleet", "name": "Флот Волгарда", "kind": "Fleet", "owner": "VOL", "at": "volgard_base" },
+    { "id": "vol_flotilla", "name": "Флотилия Волгарда", "kind": "Flotilla", "owner": "VOL", "at": "volgard_base" },
+    { "id": "ske_flotilla", "name": "Дозор Скерри", "kind": "Flotilla", "owner": "SKE", "at": "skerry_port" }
+  ],
+  "templates": [
+    { "id": "trn_mar_access", "from": "TRN", "to": "MAR", "label": "Доступ в Порт-Марену: 3 каждые 5 дней",
+      "Offer": { "expires": 3, "terms": [
+        { "Access": { "grantor": "MAR", "party": "TRN", "node": "port_marena", "until": 30 } },
+        { "Pay": { "from": "TRN", "to": "MAR", "amount": 3, "every": 5, "times": 6 } } ] } },
+    { "id": "trn_mar_access_cheap", "from": "TRN", "to": "MAR", "label": "Доступ в Порт-Марену: 1 каждые 5 дней",
+      "Offer": { "expires": 3, "terms": [
+        { "Access": { "grantor": "MAR", "party": "TRN", "node": "port_marena", "until": 30 } },
+        { "Pay": { "from": "TRN", "to": "MAR", "amount": 1, "every": 5, "times": 6 } } ] } },
+    { "id": "mar_trn_access_counter", "from": "MAR", "to": "TRN", "label": "Доступ в Порт-Марену: 4 каждые 5 дней",
+      "Offer": { "expires": 3, "counter_to": ["trn_mar_access_cheap"], "terms": [
+        { "Access": { "grantor": "MAR", "party": "TRN", "node": "port_marena", "until": 30 } },
+        { "Pay": { "from": "TRN", "to": "MAR", "amount": 4, "every": 5, "times": 6 } } ] } },
+    { "id": "trn_mar_guarantee", "from": "TRN", "to": "MAR", "label": "Гарантия Марены против блокады: 4 каждые 5 дней",
+      "Offer": { "expires": 3, "terms": [
+        { "Guarantee": { "guarantor": "MAR", "protected": "TRN", "trigger": "Blockade", "window": 3, "until": 30 } },
+        { "Pay": { "from": "TRN", "to": "MAR", "amount": 4, "every": 5, "times": 5 } } ] } },
+    { "id": "trn_ske_access", "from": "TRN", "to": "SKE", "label": "Доступ в Скерри: 1 каждые 5 дней",
+      "Offer": { "expires": 3, "terms": [
+        { "Access": { "grantor": "SKE", "party": "TRN", "node": "skerry_port", "until": 30 } },
+        { "Pay": { "from": "TRN", "to": "SKE", "amount": 1, "every": 5, "times": 6 } } ] } },
+    { "id": "vol_trn_passage", "from": "VOL", "to": "TRN", "label": "Проход через Пролив за дань: 6 каждые 5 дней",
+      "Offer": { "expires": 3, "terms": [
+        { "Passage": { "grantor": "VOL", "party": "TRN", "route": ["strait"], "until": 30 } },
+        { "Pay": { "from": "TRN", "to": "VOL", "amount": 6, "every": 5, "times": 5 } } ] } },
+    { "id": "trn_vol_ultimatum", "from": "TRN", "to": "VOL", "label": "Ультиматум Волгарду: снять блокаду Пролива", "public": true,
+      "Declare": { "kind": "Ultimatum", "deadline": 3, "claim": { "Demand": { "terms": [
+        { "Refrain": { "party": "VOL", "kind": "Blockade", "until": 30 } } ] } } } },
+    { "id": "mar_trn_support", "from": "MAR", "to": "TRN", "label": "Марена заявляет о поддержке Терна", "public": true,
+      "Declare": { "kind": "Note", "claim": { "Support": { "of": "TRN" } } } }
+  ],
+  "personas": [
+    { "id": "trn_governor", "state": "TRN", "name": "Ивар Лунд", "office": "губернатор Терна",
+      "traits": ["осторожен", "бережлив"],
+      "interests": [ { "key": "feed_the_island", "weight": 10 }, { "key": "keep_treasury", "weight": 4 } ],
+      "policy": [
+        { "when": { "Pending": { "template": "mar_trn_access_counter" } }, "do": { "Respond": { "template": "mar_trn_access_counter", "accept": true } } },
+        { "when": { "Pending": { "template": "vol_trn_passage" } }, "do": { "Respond": { "template": "vol_trn_passage", "accept": true } }, "chance": 300 },
+        { "when": { "Not": { "Any": [ { "Agreed": { "with": "MAR", "template": "trn_mar_access" } }, { "Agreed": { "with": "MAR", "template": "mar_trn_access_counter" } } ] } },
+          "do": { "Offer": "trn_mar_access" } },
+        { "when": { "All": [ { "Learned": { "kind": "Blocked", "target": "TRN" } }, { "Not": { "Agreed": { "with": "SKE" } } } ] },
+          "do": { "Offer": "trn_ske_access" } },
+        { "when": { "All": [ { "AssetAt": { "asset": "trn_convoy_1", "node": "port_marena" } }, { "Cargo": { "asset": "trn_convoy_1", "min": 1 } },
+                             { "Learned": { "kind": "Blocked", "target": "TRN", "within": 3 } } ] },
+          "do": { "Order": { "Move": { "asset": "trn_convoy_1", "to": "skerry_port", "stance": "Hold" } } } },
+        { "when": { "All": [ { "AssetAt": { "asset": "trn_convoy_1", "node": "port_marena" } }, { "Cargo": { "asset": "trn_convoy_1", "min": 1 } } ] },
+          "do": { "Order": { "Move": { "asset": "trn_convoy_1", "to": "tern_harbor", "stance": "Hold" } } } },
+        { "when": { "All": [ { "AssetAt": { "asset": "trn_convoy_1", "node": "skerry_port" } }, { "Cargo": { "asset": "trn_convoy_1", "min": 1 } } ] },
+          "do": { "Order": { "Move": { "asset": "trn_convoy_1", "to": "tern_harbor", "stance": "Hold" } } } },
+        { "when": { "All": [ { "AssetAt": { "asset": "trn_convoy_1", "node": "tern_harbor" } }, { "Agreed": { "with": "MAR" } },
+                             { "Not": { "Learned": { "kind": "Blocked", "target": "TRN", "within": 4 } } } ] },
+          "do": { "Order": { "Move": { "asset": "trn_convoy_1", "to": "port_marena", "stance": "Hold" } } } },
+        { "when": { "All": [ { "AssetAt": { "asset": "trn_convoy_2", "node": "tern_harbor" } }, { "Agreed": { "with": "SKE" } } ] },
+          "do": { "Order": { "Move": { "asset": "trn_convoy_2", "to": "skerry_port", "stance": "Hold" } } } },
+        { "when": { "All": [ { "AssetAt": { "asset": "trn_convoy_2", "node": "skerry_port" } }, { "Cargo": { "asset": "trn_convoy_2", "min": 1 } } ] },
+          "do": { "Order": { "Move": { "asset": "trn_convoy_2", "to": "tern_harbor", "stance": "Hold" } } } }
+      ] },
+    { "id": "mar_consul", "state": "MAR", "name": "Элена Дорр", "office": "консул Марены",
+      "traits": ["торговый расчёт", "не любит Волгард"],
+      "interests": [ { "key": "trade_income", "weight": 8 }, { "key": "contain_volgard", "weight": 6 } ],
+      "policy": [
+        { "when": { "Pending": { "template": "trn_mar_access" } }, "do": { "Respond": { "template": "trn_mar_access", "accept": true } } },
+        { "when": { "Pending": { "template": "trn_mar_guarantee" } }, "do": { "Respond": { "template": "trn_mar_guarantee", "accept": true } } },
+        { "when": { "Pending": { "template": "trn_mar_access_cheap" } }, "do": { "CounterWith": { "template": "trn_mar_access_cheap", "with": "mar_trn_access_counter" } } },
+        { "when": { "All": [ "Due", { "Not": { "AssetAt": { "asset": "mar_fleet", "node": "strait" } } } ] },
+          "do": { "Order": { "Move": { "asset": "mar_fleet", "to": "strait", "stance": "Escort" } } } },
+        { "when": { "All": [ { "Learned": { "kind": "BlockadeSet", "actor": "VOL" } }, { "Not": { "Learned": { "kind": "Declared", "actor": "MAR", "refid": "mar_trn_support" } } } ] },
+          "do": { "Declare": "mar_trn_support" } }
+      ] },
+    { "id": "vol_admiral", "state": "VOL", "name": "Ратмир Вольг", "office": "адмирал Волгарда",
+      "traits": ["напорист", "считает Пролив своим"],
+      "interests": [ { "key": "control_strait", "weight": 9 }, { "key": "tribute", "weight": 7 } ],
+      "policy": [
+        { "when": { "All": [ { "Day": { "from": 2 } }, { "Not": { "Agreed": { "with": "TRN", "template": "vol_trn_passage" } } },
+                             { "Not": { "Learned": { "kind": "Proposed", "actor": "VOL", "refid": "vol_trn_passage", "within": 8 } } } ] },
+          "do": { "Offer": "vol_trn_passage" } },
+        { "when": { "All": [ { "Day": { "from": 3 } }, { "AssetAt": { "asset": "vol_fleet", "node": "volgard_base" } } ] },
+          "do": { "Order": { "Move": { "asset": "vol_fleet", "to": "strait", "stance": "Blockade" } } }, "chance": 500 },
+        { "when": { "Pending": { "from": "TRN" } }, "do": { "Respond": { "from": "TRN", "accept": false } } }
+      ] },
+    { "id": "ske_elder", "state": "SKE", "name": "Тове Скар", "office": "старейшина Скерри",
+      "traits": ["нейтралитет", "ценит любой доход"],
+      "interests": [ { "key": "stay_neutral", "weight": 8 }, { "key": "trade_income", "weight": 5 } ],
+      "policy": [
+        { "when": { "Pending": { "template": "trn_ske_access" } }, "do": { "Respond": { "template": "trn_ske_access", "accept": true } } }
+      ] }
+  ],
+  "params": {
+    "cost": { "Move": 1, "Engage": 1, "Declare": 1, "DeclareWar": 2, "Mobilize": 1, "Pay": 1, "Inquire": 1, "Propose": 1, "Counter": 1 },
+    "pause_after_reject": 2,
+    "stop_after_days": 7,
+    "max_reports": 5,
+    "channels": { "Embassy": { "base": 0 }, "Telegraph": { "base": 0 }, "Press": { "base": 1 } },
+    "distort": { "Press": 100, "Leak": 200 },
+    "leak": 100,
+    "leak_days": 10,
+    "strength": { "Fleet": 3, "Flotilla": 1, "Army": 2, "Convoy": 0 },
+    "weights": {
+      "WarDeclared": 100, "HostilitiesOpened": 95, "Battle": 80, "AssetLost": 85, "Occupied": 90, "BlockadeSet": 70, "Blocked": 75,
+      "Proposed": 60, "ProposalAccepted": 55, "ProposalRejected": 50, "ProposalCountered": 50, "ProposalExpired": 30, "ProposalWithdrawn": 30,
+      "AgreementMade": 45, "AgreementConflict": 40, "Declared": 40, "ThreatUnanswered": 40, "Breach": 85, "CommitmentDue": 80, "Fulfilled": 20,
+      "Incursion": 50, "Demonstration": 45, "CargoLoaded": 15, "CargoUnloaded": 20, "Arrived": 10, "UpkeepUnpaid": 50, "PaymentFailed": 60,
+      "OrderFailed": 40, "EngageFailed": 40, "GoalAchieved": 100, "GoalFailed": 100
+    },
+    "stop_events": ["WarDeclared", "HostilitiesOpened", "BlockadeSet", "Blocked", "Breach", "AssetLost", "ProposalAccepted", "ProposalRejected", "CommitmentDue", "PaymentFailed"],
+    "guarantee_acts": ["Engage", "Escort", "DeclareWar"],
+    "max_move_targets": 12,
+    "n": { "income": 0, "food_per_day": 0, "fleet_upkeep": 1, "convoy_capacity": 10, "threat_grace": 2, "inquiry_days": 0, "agent_move_targets": 4, "agent_review_days": 3, "narrate_min_weight": 45 }
+  },
+  "goal": { "kind": "Hold", "day": 29, "label": "Терн не остался без продовольствия до конца месяца",
+            "pred": { "ResAtLeast": { "state": "TRN", "res": "Food", "value": 1 } } },
+  "end_events": [],
+  "canon": []
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --no-save --no-package-lock esbuild@0.28",
+  "buildCommand": "node scripts/shell.mjs",
+  "outputDirectory": "build/site",
+  "build": {
+    "env": {
+      "CDN_REPO": "https://cdn.jsdelivr.net/gh/nanohit/branchstate",
+      "PROXY_URL": ""
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}

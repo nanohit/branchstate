@@ -1,0 +1,26 @@
+{
+  "name": "branchstate",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --serve",
+    "e2e": "node --test --test-force-exit web/test/e2e.test.ts",
+    "test": "cargo test --workspace && node scripts/build.mjs --skip-geo && node --test --test-force-exit web/test/worker.test.ts web/test/ui.test.ts web/test/proxy.test.ts",
+    "golden": "for s in island july1914; do cargo run -q --release -p sim -- export $s 7 > crates/core/tests/golden/$s.jsonl; done",
+    "geo": "for s in island july1914; do node geo/build.mjs $s; done",
+    "proxy": "deno run --unstable-kv --allow-net --allow-env --allow-read --env-file=.env proxy/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "binaryen": "^132.0.0",
+    "esbuild": "^0.28.2",
+    "fake-indexeddb": "^6.2.5",
+    "mapshaper": "^0.7.70",
+    "playwright-core": "^1.63.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@preact/signals-core": "^1.14.4"
+  }
+}

@@ -1,0 +1,25 @@
+[package]
+name = "branchstate-core"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+# Генерация TS-типов протокола (web/src/protocol.gen.ts).
+ts = ["dep:ts-rs"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+postcard = { version = "1", default-features = false, features = ["alloc"] }
+blake3 = { version = "1", default-features = false }
+rand_chacha = { version = "0.3", default-features = false }
+rand_core = { version = "0.6", default-features = false }
+ts-rs = { version = "12", optional = true, features = ["serde-json-impl"] }
+
+[dev-dependencies]
+proptest = { version = "1", default-features = false, features = ["std"] }
+
+[[bin]]
+name = "gen-ts"
+path = "src/bin/gen_ts.rs"
+required-features = ["ts"]
