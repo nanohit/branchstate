@@ -195,8 +195,18 @@ kv.listenQueue((msg) => execute((msg as { op_id: string }).op_id));
 
 // ---- HTTP
 
-const cors = { 'access-control-allow-origin': env('ALLOWED_ORIGIN', '*'), 'access-control-allow-headers': 'content-type, authorization', 'access-control-allow-methods': 'GET, POST, OPTIONS' };
-const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...cors } });
+// Разрешённые источники — через запятую; `*` — любой (локальная разработка).
+const ORIGINS = env('ALLOWED_ORIGIN', '*').split(',').map((s) => s.trim());
+function cors(req: Request, res: Response): Response {
+  const origin = req.headers.get('origin') ?? '';
+  const allow = ORIGINS.includes('*') ? '*' : ORIGINS.includes(origin) ? origin : ORIGINS[0];
+  res.headers.set('access-control-allow-origin', allow);
+  res.headers.set('access-control-allow-headers', 'content-type, authorization');
+  res.headers.set('access-control-allow-methods', 'GET, POST, OPTIONS');
+  res.headers.set('vary', 'origin');
+  return res;
+}
+const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 const view = (op: Op) => ({ status: op.status, result: op.result, model_used: op.model_used, cost_rub: op.cost_rub });
 
 async function postOp(req: Request, token: string): Promise<Response> {
@@ -266,7 +276,7 @@ async function ledger(): Promise<Response> {
 
 async function handle(req: Request): Promise<Response> {
   const url = new URL(req.url);
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204 });
   if (url.pathname === '/v1/session' && req.method === 'POST') {
     const payload = b64(enc.encode(JSON.stringify({ id: crypto.randomUUID(), iat: Date.now() })));
     return json(200, { token: `${payload}.${await sign(payload)}`, limits: LIMITS });
@@ -290,4 +300,4 @@ fetch(PRICE_CATALOG, { signal: AbortSignal.timeout(10_000) })
   })
   .catch(() => console.warn('каталог моделей недоступен: затраты считаются по нулевым ценам'));
 
-Deno.serve({ port: Number(env('PORT', '8787')) }, (req) => handle(req).catch((e) => json(500, { error: String(e) })));
+Deno.serve({ port: Number(env('PORT', '8787')) }, async (req) => cors(req, await handle(req).catch((e) => json(500, { error: String(e) }))));
