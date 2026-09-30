@@ -9,6 +9,7 @@
     "test": "cargo test --workspace && node scripts/build.mjs --skip-geo && node --test --test-force-exit web/test/worker.test.ts web/test/ui.test.ts web/test/proxy.test.ts",
     "golden": "for s in island july1914; do cargo run -q --release -p sim -- export $s 7 > crates/core/tests/golden/$s.jsonl; done",
     "geo": "for s in island july1914; do node geo/build.mjs $s; done",
+    "release": "node scripts/release.mjs",
     "proxy": "deno run --unstable-kv --allow-net --allow-env --allow-read --env-file=.env proxy/main.ts"
   },
   "devDependencies": {
