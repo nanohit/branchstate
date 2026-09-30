@@ -7,7 +7,7 @@
   "build": {
     "env": {
       "CDN_REPO": "https://cdn.jsdelivr.net/gh/nanohit/branchstate",
-      "PROXY_URL": ""
+      "PROXY_URL": "https://branchstate.alphy.deno.net"
     }
   },
   "headers": [
